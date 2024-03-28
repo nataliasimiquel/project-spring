@@ -15,17 +15,32 @@ public class ClientComponent {
     public String getValues () {
         try {
 	    Document doc = Jsoup.connect("http://www.nfe.fazenda.gov.br/portal/disponibilidade.aspx").get();
-
-	    Elements paragraphs = doc.select("p");
-
+	    Elements rows = doc.select("tr.linhaImparCentralizada, tr.linhaParCentralizada");
 	    StringBuilder result = new StringBuilder();
-	    for (org.jsoup.nodes.Element paragraph : paragraphs) {
-	        result.append(paragraph.text()).append("\n");
-	    }
-	    return result.toString();
+            for (Element row : rows) {
+	        Element firstCell = row.selectFirst("td");
+                String state = firstCell.text();
+                Element fifthCellImage = row.select("td:nth-child(5) img").first();
+                String srcAttribute = fifthCellImage.attr("src");
+                String status;
+                if (srcAttribute.equals("imagens/bola_verde_P.png")) {
+	            status = "positivo";
+                } else if (srcAttribute.equals("imagens/bola_amarela_P.png")) {
+	            status = "alerta";
+                } else if (srcAttribute.equals("imagens/bola_vermelha_P.png")) {
+	            status = "negativo";
+                } else {
+	            status = "desconhecido";
+                }
+                result.append(", Estado: ").append(state).append("Status: ").append(status).append(System.lineSeparator());
+
+            }
+            return result.toString();
         } catch (IOException e) {
-	    e.printStackTrace();
-	    return null;
+            e.printStackTrace();
+            return null;
         }
     }
+
+
 }
