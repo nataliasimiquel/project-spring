@@ -4,6 +4,8 @@ import com.projectback.demo.client.ClientComponent;
 import com.projectback.demo.entity.StatusEntity;
 import com.projectback.demo.service.StatusService;
 import lombok.AllArgsConstructor;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,10 +26,27 @@ import java.util.List;
 	private final ClientComponent clientComponent;
 
 	private final StatusService statusService;
-	@GetMapping("/status")
-	public String getStatus() {
-	    return clientComponent.getValues();
+    @GetMapping("/status")
+    public String getStatus() {
+	String values = clientComponent.getValues();
+	if (values != null) {
+	    try {
+		JSONArray jsonArray = new JSONArray();
+		String[] lines = values.split(System.lineSeparator());
+		for (String line : lines) {
+		    String[] parts = line.split(" Status: ");
+		    JSONObject jsonObject = new JSONObject();
+		    jsonObject.put("estado", parts[0].split("Estado: ")[1]);
+		    jsonObject.put("status", parts[1]);
+		    jsonArray.put(jsonObject);
+		}
+		return jsonArray.toString();
+	    } catch (Exception e) {
+		e.printStackTrace();
+	    }
 	}
+	return null;
+    }
         @GetMapping("/{estado}")
         public List<StatusEntity> getStatusPorEstado(@PathVariable String estado) {
 	    return statusService.getStatusPorEstado(estado);
