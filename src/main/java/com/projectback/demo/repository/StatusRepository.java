@@ -10,6 +10,7 @@ import java.util.List;
 @Repository
 public interface StatusRepository extends JpaRepository<StatusEntity, Long> {
     List<StatusEntity> findByEstado(String estado);
-    List<StatusEntity> findByData(LocalDateTime data);
+    List<StatusEntity> findByDataBetween(LocalDateTime startDateTime, LocalDateTime endDateTime);
+
 
 }

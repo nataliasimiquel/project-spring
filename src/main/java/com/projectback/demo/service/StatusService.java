@@ -6,6 +6,8 @@ import com.projectback.demo.repository.StatusRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -41,12 +43,14 @@ public class StatusService {
             }
         }
     }
+    @GetMapping("/{estado}")
     public List<StatusEntity> getStatusPorEstado(String estado) {
-        return statusRepository.findByEstado(estado);
+        List<StatusEntity> statusList = statusRepository.findByEstado(estado);
+        return statusList.subList(0, Math.min(statusList.size(), 10));
     }
 
-    public List<StatusEntity> getStatusPorData(LocalDateTime data) {
-        return statusRepository.findByData(data);
+    public List<StatusEntity> getStatusPorData(LocalDateTime startDateTime, LocalDateTime endDateTime) {
+        return statusRepository.findByDataBetween(startDateTime, endDateTime);
     }
     public String estadoComMaisAlertasENegativos() {
         List<StatusEntity> allStatus = statusRepository.findAll();

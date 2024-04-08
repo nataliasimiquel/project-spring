@@ -1,5 +1,7 @@
 package com.projectback.demo.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.projectback.demo.client.ClientComponent;
 import com.projectback.demo.entity.StatusEntity;
 import com.projectback.demo.service.StatusService;
@@ -15,7 +17,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @RestController
@@ -51,14 +55,26 @@ import java.util.List;
         public List<StatusEntity> getStatusPorEstado(@PathVariable String estado) {
 	    return statusService.getStatusPorEstado(estado);
         }
-        @GetMapping("/data")
-        public List<StatusEntity> getStatusPorData(
-	        @RequestParam(value = "data") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime data) {
-	    return statusService.getStatusPorData(data);
-        }
+    @GetMapping("/data")
+    public List<StatusEntity> getStatusPorData(
+	    @RequestParam(value = "data") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data) {
+	LocalDateTime startDateTime = data.atStartOfDay();
+	LocalDateTime endDateTime = data.atTime(LocalTime.MAX);
+	return statusService.getStatusPorData(startDateTime, endDateTime);
+    }
     @GetMapping("/most-alerts-and-negatives")
-    public String getEstadoComMaisAlertasENegativos() {
-	return statusService.estadoComMaisAlertasENegativos();
+    public ResponseEntity<String> getEstadoComMaisAlertasENegativos() {
+	Object objetoRetornado = statusService.estadoComMaisAlertasENegativos();
+	String jsonString = "";
+
+	try {
+	    ObjectMapper objectMapper = new ObjectMapper();
+	    jsonString = objectMapper.writeValueAsString(objetoRetornado);
+	} catch (JsonProcessingException e) {
+	    e.printStackTrace();
+	}
+
+	return ResponseEntity.ok(jsonString);
     }
         @PostMapping("/create")
             public ResponseEntity<Void> saveStatusFromValues() {
