@@ -45,8 +45,7 @@ public class StatusService {
     }
     @GetMapping("/{estado}")
     public List<StatusEntity> getStatusPorEstado(String estado) {
-        List<StatusEntity> statusList = statusRepository.findByEstado(estado);
-        return statusList.subList(0, Math.min(statusList.size(), 10));
+        return statusRepository.findByEstado(estado);
     }
 
     public List<StatusEntity> getStatusPorData(LocalDateTime startDateTime, LocalDateTime endDateTime) {
